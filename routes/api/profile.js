@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const auth = require('../../middleware/auth');
-const { check, validationResult } = require('express-validator/check');
+const { check, validationResult } = require('express-validator');
 
 const Profile = require('../../models/Profile');
 const User = require('../../models/User');
@@ -14,12 +14,14 @@ router.get('/me', auth, async (req, res) => {
         .findOne({user: req.user.id })
         .populate(
             'user', 
-            ['name', 'avatar']);
+            ['name', 'avatar']
+        );
 
         if(!profile) {
             return res.status(400).json({ msg: 'There is no profile for this user' });
 
         }
+        res.json(profile);
     } catch(err) {
         console.log(err.message);
         res.atatus(500).send('Server Error');
@@ -83,21 +85,33 @@ router.post(
 
             if(profile) {
                 profile = await Profile.findOneAndUpdate(
-                    { user: req.user.id}, 
-                    { $set: profileFields},
-                    { new: true }
+                    { user: req.user.id }, 
+                    { $set: profileFields },
+                    { new: true, upsert: true }
                 )
-                return res.json(profile);
+                res.json(profile);
             }
-            // Create
-            profile = new Profile(profileFields);
-            
-            await profile.save();
-            res.json(profile);
         } catch(err) {
             console.error(err.message);
             res.status(500).send('Server error');
         }
     }
 );
+
+router.get('/user/:user_id', async (req, res) => {
+    try {
+        const profile = await Profile.findOne({ user: req.params.user_id }).populate('user', ['name', 'avatar']);
+
+        if(!profile) {
+            return res.status(400).json({msg: 'Profile not found'});
+        }
+        res.json(profile);
+    } catch (err) {
+        console.error(err.message);
+        if(err.kind = 'ObjectId') {
+            return res.status(400).json({msg: 'Profile not found'});
+        }
+        res.status(500).send('Server Error');
+    }
+})
 module.exports = router;
