@@ -1,25 +1,25 @@
 import React, {Fragment, useState} from 'react';
+import { connect } from 'react-redux';
 import {Link} from 'react-router-dom';
+import { login } from '../../actions/auth';
+import PropTypes from 'prop-types'
 
-const Login = () => {
+const Login = ({ login }) =>  {
     const [formData, setFormData] = useState({
         email: '',
         password: '',
     });
 
-    const { email, password} = formData;
+    const { email, password } = formData;
 
     const onChange = event => setFormData({ ...formData, [event.target.name]: event.target.value });
 
     const onSubmit = async event => {
         event.preventDefault();
-        console.log('Success');
+        login(email, password);
     }
     return (
         <Fragment>
-            <div className="alert alert-danger">
-            Invalid credentials
-            </div>
             <h1 className="large text-primary">Sign In</h1>
             <p className="lead"><i className="fas fa-user"></i> Sign into Your Account</p>
             <form className="form" onSubmit={e => onSubmit(e)}>
@@ -50,5 +50,8 @@ const Login = () => {
         </Fragment>
     )
 }
+Login.PropTypes = {
+    login: PropTypes.func.isRequired
+}
 
-export default Login
+export default connect(null, { login })(Login)
