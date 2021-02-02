@@ -6,6 +6,7 @@ const { check, validationResult } = require('express-validator');
 
 const Profile = require('../../models/Profile');
 const User = require('../../models/User');
+const Post = require('../../models/Post');
 
 const router = express.Router();
 
@@ -47,11 +48,11 @@ router.post(
             return res.status(500).json({ errors: errors.array() });
         }
         const {
+            status,
             company,
             website,
             location,
             bio,
-            status,
             githubusername,
             skills,
             youtube,
@@ -68,7 +69,7 @@ router.post(
         if(website) profileFields.website = website;
         if(location) profileFields.location = location;
         if(bio) profileFields.bio = bio;
-        if(status) profileFields.status = company;
+        if(status) profileFields.status = status;
         if(githubusername) profileFields.githubusername = githubusername;
 
         if(skills) profileFields.skills = skills.split(',').map(skill => skill.trim());
@@ -224,7 +225,7 @@ router.post(
         }
 });
 
-// Delete experience
+// Delete education
 router.delete('/education/:edu_id', auth, async (req, res) => {
     try {
         const profile = await Profile.findOne({ user: req.user.id });
@@ -290,6 +291,8 @@ router.get('/user/:user_id', async (req, res) => {
 // Delete user
 router.delete('/', auth, async (req, res) => {
     try {
+        // Remove Posts
+        await Post.deleteMany({ user: req.user.id })
         // Remove Profile
         await Profile.findOneAndRemove({ user: req.user.id });
         // Remove User
