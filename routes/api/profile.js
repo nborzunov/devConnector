@@ -257,30 +257,31 @@ router.delete('/education/:edu_id', auth, async (req, res) => {
 // Get Github repos of user
 router.get('/github/:username', (req, res) => {
     try {
-        const options = {
-          uri: encodeURI(`https://api.github.com/users/${
-            req.params.username
-          }/repos?per_page=5&sort=created:asc&client_id=${config.get(
-            'githubClientId'
-          )}&client_secret=${config.get('githubSecretKey')}`),
-          method: 'GET',
-          headers: { 'user-agent': 'node.js' }
-        };
-    
-        request(options, (error, response, body) => {
-          if (error) console.error(error);
-    
-          if (response.statusCode !== 200) {
-            return res.status(404).json({ msg: 'No Github profile found' });
-          }
-    
-          res.json(JSON.parse(body));
-        });
-      } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
-      }
-    });
+      const options = {
+        uri: encodeURI(`https://api.github.com/users/${
+          req.params.username
+        }/repos?per_page=5&sort=created:asc&client_id=${config.get(
+          'githubClientId'
+        )}&client_secret=${config.get('githubSecretKey')}`),
+        method: 'GET',
+        headers: { 'user-agent': 'node.js' }
+      };
+  
+      request(options, (error, response, body) => {
+        if (error) console.error(error);
+  
+        if (response.statusCode !== 200) {
+          return res.status(404).json({ msg: 'No Github profile found' });
+        }
+  
+        res.json(JSON.parse(body));
+      });
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send('Server Error');
+    }
+  });
+
 // Get profile by user id
 router.get('/user/:user_id', async (req, res) => {
     try {
