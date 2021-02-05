@@ -6,6 +6,9 @@ const User = require('../../models/User');
 const Profile = require('../../models/Profile');
 const Post = require('../../models/Post');
 
+
+const checkObjectId = require('../../middleware/checkObjectId');
+
 const router = express.Router();
 
 // Create post
@@ -57,21 +60,21 @@ router.get('/', auth, async (req, res) => {
 });
 
 // Get one post
-router.get('/:post_id', auth, async (req, res) => {
+router.get('/:id', auth, checkObjectId('id'), async (req, res) => {
     try {
-        const post = Post.findById(req.params.post_id);
-        if (!post){
-            return res.status(404).json({ msg: 'Post not found' });
-        }
-        res.json(post);
+      const post = await Post.findById(req.params.id);
+  
+      if (!post) {
+        return res.status(404).json({ msg: 'Post not found' });
+      }
+  
+      res.json(post);
     } catch (err) {
-        console.log(err.message);
-        if (err.kind === 'ObjectId'){
-            return res.status(404).json({ msg: 'Post not found' });
-        }
-        res.status(500).send({ msg: 'Server error' });
+      console.error(err.message);
+  
+      res.status(500).send('Server Error');
     }
-});
+  });
 
 // Delete post
 router.delete('/:id', auth, async (req, res) => {
